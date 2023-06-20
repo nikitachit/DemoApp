@@ -1,0 +1,4 @@
+<resources>
+    <string name="app_name">TestMovieApp</string>
+    <string name="searchHint">get matching movies by name</string>
+</resources>
