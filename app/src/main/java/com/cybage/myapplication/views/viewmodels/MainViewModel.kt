@@ -12,30 +12,28 @@ import retrofit2.Callback
 import retrofit2.Response
 import javax.inject.Inject
 
-class MainViewModel @Inject constructor(private val repository: MovieRepository)  : ViewModel() {
+class MainViewModel @Inject constructor(private val repository: MovieRepository) : ViewModel() {
 
     val movieList = MutableLiveData<List<Movie>>()
     val errorMessage = MutableLiveData<String>()
     val loading = MutableLiveData<Boolean>(false)
 
-    fun getAllMovies(search_query :String) {
+    fun getAllMovies(search_query: String) {
 
         loading.postValue(true)
         val response = repository.getAllMovies(search_query)
 
         response.enqueue(object : Callback<MovieList> {
             override fun onResponse(call: Call<MovieList>, response: Response<MovieList>) {
-                if(response.body()!!.results.isEmpty())
-                {
+                if (response.body()!!.results.isEmpty()) {
                     errorMessage.postValue("No matching movies found")
-                }
-                else
-                {
+                } else {
                     errorMessage.postValue("")
                     movieList.postValue(response.body()!!.results)
                 }
                 loading.postValue(false)
             }
+
             override fun onFailure(call: Call<MovieList>, t: Throwable) {
                 errorMessage.postValue(t.message)
                 loading.postValue(false)

@@ -8,7 +8,7 @@ import dagger.Provides
 @Module
 class RestrofitServiceModule {
     @Provides
-     fun provideRetrofitMopdule():RetrofitService {
-         return RetrofitService.getInstance()
+    fun provideRetrofitMopdule(): RetrofitService {
+        return RetrofitService.getInstance()
     }
 }

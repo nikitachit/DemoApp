@@ -24,7 +24,7 @@ interface RetrofitService {
 
         var retrofitService: RetrofitService? = null
 
-        fun getInstance() : RetrofitService {
+        fun getInstance(): RetrofitService {
             if (retrofitService == null) {
                 val retrofit = Retrofit.Builder()
                     .baseUrl(Constants.API_SERVICE_PATH)
@@ -38,6 +38,6 @@ interface RetrofitService {
     }
 
     @GET("movie")
-    fun getAllMovies(@Query("query")query : String): Call<MovieList>
+    fun getAllMovies(@Query("query") query: String): Call<MovieList>
 
 }

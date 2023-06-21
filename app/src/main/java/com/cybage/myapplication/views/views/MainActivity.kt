@@ -13,63 +13,87 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import com.cybage.myapplication.R
 import com.cybage.myapplication.databinding.ActivityMainBinding
 import com.cybage.myapplication.views.di.MyApplication
+import com.cybage.myapplication.views.networkservice.NetworkConnectionListener
 import com.cybage.myapplication.views.networkservice.RetrofitService
 import com.cybage.myapplication.views.repository.MovieRepository
 import com.cybage.myapplication.views.viewmodels.MainViewModel
 import com.cybage.myapplication.views.viewmodels.MainViewModelFactory
+import com.google.android.material.snackbar.Snackbar
 import javax.inject.Inject
 
 class MainActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityMainBinding
+
     @Inject
     lateinit var viewModel: MainViewModel
     val adapter = MovieAdapter()
-    @SuppressLint("SuspiciousIndentation")
+    private lateinit var connectivityLiveData: NetworkConnectionListener
     override fun onCreate(savedInstanceState: Bundle?) {
         (application as MyApplication).appComponent.inject(this)
         super.onCreate(savedInstanceState)
         binding = DataBindingUtil.setContentView(this, R.layout.activity_main)
-        binding.viewmodel=viewModel
+        binding.viewmodel = viewModel
         binding.setLifecycleOwner(this)
         binding.searchMovieList.adapter = adapter
-        binding.searchMovieList.layoutManager=LinearLayoutManager(this,LinearLayoutManager.VERTICAL,false)
+        binding.searchMovieList.layoutManager =
+            LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false)
         viewModel.movieList.observe(this, Observer {
             adapter.setMovieList(it)
         })
         viewModel.errorMessage.observe(this, Observer {
-            if(it.isNotEmpty())
-            {
-                binding.txterror.visibility=View.VISIBLE
-                binding.txterror.text=it.toString()
-            }
-            else
-                binding.txterror.visibility=View.GONE
+            if (it.isNotEmpty()) {
+                binding.txterror.visibility = View.VISIBLE
+                binding.txterror.text = it.toString()
+            } else
+                binding.txterror.visibility = View.GONE
 
         })
         viewModel.loading.observe(this, Observer {
-            when(it) {
+            when (it) {
                 true -> binding.progressBar.visibility = View.VISIBLE
                 false -> binding.progressBar.visibility = View.GONE
-        }
-            })
+            }
+        })
 
-       binding.searchviewMovieList.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
-           override fun onQueryTextSubmit(query: String): Boolean {
-             if(query.isNotEmpty())
-                 viewModel.getAllMovies(query)
-               return false
-           }
-           override fun onQueryTextChange(newText: String): Boolean {
+        connectivityLiveData = NetworkConnectionListener(application)
+        connectivityLiveData.observe(this, Observer { isAvailable ->
+            when (isAvailable) {
+                true -> {
+                    val snack = Snackbar.make(
+                        binding.txterror,
+                        getString(R.string.connection_msg),
+                        Snackbar.LENGTH_LONG
+                    )
+                    snack.show()
+                }
+                false -> {
+                    val snack = Snackbar.make(
+                        binding.txterror,
+                        getString(R.string.no_connection_msg),
+                        Snackbar.LENGTH_LONG
+                    )
+                    snack.show()
+                }
 
-               if(newText.isEmpty())
-                   adapter.movies.clear()
-               adapter.notifyDataSetChanged()
-               return false
-           }
-       })
+            }
+        })
 
+        binding.searchviewMovieList.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
+            override fun onQueryTextSubmit(query: String): Boolean {
+                if (query.isNotEmpty())
+                    viewModel.getAllMovies(query)
+                return false
+            }
 
+            override fun onQueryTextChange(newText: String): Boolean {
+
+                if (newText.isEmpty())
+                    adapter.movies.clear()
+                adapter.notifyDataSetChanged()
+                return false
+            }
+        })
 
 
     }

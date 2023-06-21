@@ -14,5 +14,6 @@ interface AppComponent {
         // With @BindsInstance, the Context passed in will be available in the graph
         fun create(@BindsInstance context: Context): AppComponent
     }
+
     fun inject(activity: MainActivity)
 }
